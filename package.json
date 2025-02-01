@@ -1,0 +1,22 @@
+{
+  "name": "rag-app-with-langchain",
+  "version": "1.0.0",
+  "description": "RAG Pipeline using LangChain",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "RAG",
+    "LangChain",
+    "LLM"
+  ],
+  "author": "Admir Alicic",
+  "license": "ISC",
+  "dependencies": {
+    "@langchain/community": "^0.3.28",
+    "@langchain/ollama": "^0.1.5",
+    "chromadb": "^1.10.4",
+    "pdf-parse": "^1.1.1"
+  }
+}
