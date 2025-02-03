@@ -1,6 +1,7 @@
-import { Ollama } from "@langchain/ollama";
+import { Ollama, OllamaEmbeddings } from "@langchain/ollama";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { CharacterTextSplitter } from "@langchain/textsplitters";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import path from "node:path";
 
 export class PdfQA {
@@ -18,6 +19,12 @@ export class PdfQA {
     await this.loadDocuments();
     await this.splitDocuments();
 
+    this.selectEmbedding = new OllamaEmbeddings({
+      model: "all-minilm:latest",
+    });
+
+    await this.createVectorStore();
+
     return this;
   }
 
@@ -27,8 +34,6 @@ export class PdfQA {
     this.llm = new Ollama({ model: this.model });
 
     console.log("Model loaded successfully!");
-    const response = await this.llm.invoke("What is the capital of France");
-    console.log(response);
   }
 
   async loadDocuments() {
@@ -51,5 +56,14 @@ export class PdfQA {
     });
 
     this.texts = await textSplitter.splitDocuments(this.documents);
+  }
+
+  async createVectorStore() {
+    console.log("Creating document embeddings...");
+
+    this.db = await MemoryVectorStore.fromDocuments(
+      this.texts,
+      this.selectEmbedding
+    );
   }
 }

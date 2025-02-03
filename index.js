@@ -8,4 +8,15 @@ const pdfQA = await new PdfQA({
   chunkOverlap: 0,
 }).init();
 
-console.log(pdfQA.texts.length);
+console.log("Embeddings model: ", pdfQA.db.embeddings.model);
+console.log("# of embeddings: ", pdfQA.db.memoryVectors.length);
+
+const similaritySearchWithScoreResults =
+  await pdfQA.db.similaritySearchWithScore("File type associations", 10);
+
+console.log("Document pages and their score related to our query:");
+for (const [doc, score] of similaritySearchWithScoreResults) {
+  console.log(
+    `* [SIM=${score.toFixed(3)}] [Page number: ${doc.metadata.loc.pageNumber}]`
+  );
+}
