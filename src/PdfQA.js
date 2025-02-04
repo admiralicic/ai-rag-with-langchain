@@ -5,25 +5,32 @@ import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import path from "node:path";
 
 export class PdfQA {
-  constructor({ model, pdfDocument, chunkSize, chunkOverlap }) {
+  constructor({
+    model,
+    pdfDocument,
+    chunkSize,
+    chunkOverlap,
+    searchType = "similarity",
+    kdocuments,
+  }) {
     this.model = model;
     this.pdfDocument = pdfDocument;
     this.chunkSize = chunkSize;
     this.chunkOverlap = chunkOverlap;
+    this.searchType = searchType;
+    this.kdocuments = kdocuments;
   }
 
   async init() {
     // Load the chat model
     this.initChatModel();
-
     await this.loadDocuments();
     await this.splitDocuments();
-
     this.selectEmbedding = new OllamaEmbeddings({
       model: "all-minilm:latest",
     });
-
     await this.createVectorStore();
+    this.createRetreiver();
 
     return this;
   }
@@ -65,5 +72,13 @@ export class PdfQA {
       this.texts,
       this.selectEmbedding
     );
+  }
+
+  createRetreiver() {
+    console.log("Initialize vector store retreiver...");
+    this.retriever = this.db.asRetriever({
+      k: this.kdocuments,
+      searchType: this.searchType,
+    });
   }
 }
