@@ -2,6 +2,9 @@ import { Ollama, OllamaEmbeddings } from "@langchain/ollama";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { CharacterTextSplitter } from "@langchain/textsplitters";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { createRetrievalChain } from "langchain/chains/retrieval";
 import path from "node:path";
 
 export class PdfQA {
@@ -31,7 +34,7 @@ export class PdfQA {
     });
     await this.createVectorStore();
     this.createRetreiver();
-
+    this.chain = await this.createChain();
     return this;
   }
 
@@ -80,5 +83,32 @@ export class PdfQA {
       k: this.kdocuments,
       searchType: this.searchType,
     });
+  }
+
+  async createChain() {
+    console.log("Creating Retrieval QA Chain...");
+
+    console.log("Setting up prompt template...");
+    const prompt = ChatPromptTemplate.fromTemplate(
+      `Answer the user question: {input} based on the following context {context}`
+    );
+
+    console.log("Setting up combine documents chain...");
+    const combineDocsChain = await createStuffDocumentsChain({
+      llm: this.llm,
+      prompt,
+    });
+
+    console.log("Setting up retrieval chain...");
+    const chain = await createRetrievalChain({
+      combineDocsChain,
+      retriever: this.retriever,
+    });
+
+    return chain;
+  }
+
+  queryChain() {
+    return this.chain;
   }
 }

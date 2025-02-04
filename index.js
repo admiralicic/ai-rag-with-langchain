@@ -1,18 +1,18 @@
 import { PdfQA } from "./src/PdfQA.js";
 
 const pdfDocument = "../documents/pycharm-documentation-mini.pdf";
-const pdfQA = await new PdfQA({
+const pdfQa = await new PdfQA({
   model: "llama3",
   pdfDocument,
   chunkSize: 1000,
   chunkOverlap: 0,
 }).init();
 
-console.log("# of returned documents: ", pdfQA.retriever.k);
-console.log("Search Type: ", pdfQA.retriever.searchType);
+const pdfQaChain = pdfQa.queryChain();
 
-const relevantDocuments = await pdfQA.retriever.invoke(
-  "What can I do with AI in PyCharm?"
-);
+const answer = await pdfQaChain.invoke({
+  input: "How do we add a custom file type in PyCharm",
+});
 
-console.log("Relevant Documents: ", relevantDocuments);
+console.log(answer.answer, "\n");
+console.log("# of documents used as context:", answer.context.length, "\n");
